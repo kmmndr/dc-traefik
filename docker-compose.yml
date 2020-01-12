@@ -1,0 +1,90 @@
+version: '3.7'
+
+services:
+  traefik:
+    image: "traefik:v2.2"
+    restart: always
+    container_name: "traefik"
+    command:
+      - "--global.sendanonymoususage=true"
+      - "--api=true"
+      - "--api.insecure=${API_INSECURE:-false}"
+      - "--accesslog=true"
+      # - "--log.level=DEBUG"
+      # - "--providers.rest=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=traefik_default"
+      - "--entrypoints.web.address=:80"
+      - "--entryPoints.websecure.address=:443"
+
+      # Default resolver
+      - "--certificatesresolvers.default.acme.tlschallenge=true"
+      - "--certificatesresolvers.default.acme.email=${EMAIL:-root@localhost}"
+      - "--certificatesresolvers.default.acme.storage=/letsencrypt/default.json"
+      - "--certificatesresolvers.default.acme.caserver=${ACME_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}"
+
+      # step-ca HTTP resolver
+      - "--certificatesResolvers.acme-http.acme.httpChallenge.entryPoint=web"
+      - "--certificatesresolvers.acme-http.acme.email=${EMAIL:-root@localhost}"
+      - "--certificatesresolvers.acme-http.acme.storage=/letsencrypt/step-ca-http.json"
+      - "--certificatesresolvers.acme-http.acme.caserver=${ACME_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}"
+
+      # step-ca TLS resolver
+      - "--certificatesresolvers.acme-tls.acme.tlschallenge=true"
+      - "--certificatesresolvers.acme-tls.acme.email=${EMAIL:-root@localhost}"
+      - "--certificatesresolvers.acme-tls.acme.storage=/letsencrypt/step-ca-tls.json"
+      - "--certificatesresolvers.acme-tls.acme.caserver=${ACME_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}"
+
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    labels:
+      - "traefik.enable=true"
+
+      # Auth middleware (admin:admin by default)
+      - 'traefik.http.middlewares.auth.basicauth.users=admin:${ADMIN_PASSWORD:-disabled}'
+
+      # Api Dashboard
+      - "traefik.http.routers.traefik.rule=Host(`${HOST:-localhost}`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.middlewares=auth"
+      - "traefik.http.routers.traefik.tls.certresolver=default"
+      - "traefik.http.routers.traefik.entrypoints=web,websecure"
+
+      # middleware redirect
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+
+      # global redirect to https
+      #- "traefik.http.routers.redirs.rule=hostregexp(`{host:.+}`)"
+      #- "traefik.http.routers.redirs.entrypoints=web"
+      #- "traefik.http.routers.redirs.middlewares=redirect-to-https"
+
+  whoami:
+    image: "containous/whoami"
+    restart: always
+    container_name: "whoami"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`${HOST:-localhost}`) && PathPrefix(`/whoami`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
+      - "traefik.http.routers.whoami.middlewares=redirect-to-https"
+      - "traefik.http.routers.whoami-tls.rule=Host(`${HOST:-localhost}`) && PathPrefix(`/whoami`)"
+      - "traefik.http.routers.whoami-tls.entrypoints=websecure"
+      - "traefik.http.routers.whoami-tls.tls.certresolver=default"
+
+  traefik-certs:
+    build: certs-extrator
+    restart: always
+    volumes:
+      - letsencrypt:/letsencrypt
+      - certs:/certs
+    command: sh -c "while true; do certs-extractor /letsencrypt/ /certs/; sleep 86400; done"
+
+volumes:
+  letsencrypt:
+  certs:
