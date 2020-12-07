@@ -1,5 +1,5 @@
 # FROM alpine:edge
-FROM alpine:3.11
+FROM alpine:3.12
 
 RUN apk add --no-cache ruby ruby-json
 COPY certs-extrator.rb /usr/local/bin/certs-extractor

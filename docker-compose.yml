@@ -1,8 +1,8 @@
-version: '3.7'
+version: '3.8'
 
 services:
   traefik:
-    image: "traefik:v2.2"
+    image: "traefik:v2.3"
     restart: always
     container_name: "traefik"
     command:
