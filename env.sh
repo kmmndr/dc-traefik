@@ -11,15 +11,15 @@ stage=${1:-'default'}
 # ACME_CA_SERVER='https://step-ca.lan:9000/acme/acme/directory'
 cat <<EOF
 COMPOSE_PROJECT_NAME=traefik
-HOST=localhost
-EMAIL=root@localhost
-ADMIN_PASSWORD='$(openssl passwd -apr1 "admin")'
 EOF
 
 case "$stage" in
 	"default")
 		cat <<-EOF
 		API_INSECURE=true
+		ADMIN_PASSWORD='$(openssl passwd -apr1 "admin")'
+		EMAIL=root@localhost
+		HOST=localhost
 		EOF
 		;;
 
