@@ -1,5 +1,5 @@
 default: help
-include *.mk
+include makefiles/*.mk
 
 start: docker-compose-pull docker-compose-start ##- Start
 deploy: docker-compose-pull docker-compose-deploy ##- Deploy (start remotely)
