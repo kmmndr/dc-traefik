@@ -27,13 +27,13 @@ services:
       # step-ca HTTP resolver
       - "--certificatesResolvers.acme-http.acme.httpChallenge.entryPoint=web"
       - "--certificatesresolvers.acme-http.acme.email=${EMAIL:-root@localhost}"
-      - "--certificatesresolvers.acme-http.acme.storage=/letsencrypt/step-ca-http.json"
+      - "--certificatesresolvers.acme-http.acme.storage=/letsencrypt/acme-http.json"
       - "--certificatesresolvers.acme-http.acme.caserver=${ACME_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}"
 
       # step-ca TLS resolver
       - "--certificatesresolvers.acme-tls.acme.tlschallenge=true"
       - "--certificatesresolvers.acme-tls.acme.email=${EMAIL:-root@localhost}"
-      - "--certificatesresolvers.acme-tls.acme.storage=/letsencrypt/step-ca-tls.json"
+      - "--certificatesresolvers.acme-tls.acme.storage=/letsencrypt/acme-tls.json"
       - "--certificatesresolvers.acme-tls.acme.caserver=${ACME_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}"
 
     ports:
