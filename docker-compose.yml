@@ -18,19 +18,25 @@ services:
       - "--entrypoints.web.address=:80"
       - "--entryPoints.websecure.address=:443"
 
-      # Default resolver
-      - "--certificatesresolvers.default.acme.tlschallenge=true"
-      - "--certificatesresolvers.default.acme.email=${EMAIL:-root@localhost}"
-      - "--certificatesresolvers.default.acme.storage=/letsencrypt/default.json"
-      - "--certificatesresolvers.default.acme.caserver=${ACME_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}"
+      # Default acme http resolver
+      - "--certificatesResolvers.default-http.acme.httpChallenge.entryPoint=web"
+      - "--certificatesresolvers.default-http.acme.email=${EMAIL:-root@localhost}"
+      - "--certificatesresolvers.default-http.acme.storage=/letsencrypt/default-http.json"
+      - "--certificatesresolvers.default-http.acme.caserver=${DEFAULT_ACME_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}"
 
-      # step-ca HTTP resolver
+      # Default acme tls resolver
+      - "--certificatesresolvers.default-tls.acme.tlschallenge=true"
+      - "--certificatesresolvers.default-tls.acme.email=${EMAIL:-root@localhost}"
+      - "--certificatesresolvers.default-tls.acme.storage=/letsencrypt/default-tls.json"
+      - "--certificatesresolvers.default-tls.acme.caserver=${DEFAULT_ACME_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}"
+
+      # acme http resolver
       - "--certificatesResolvers.acme-http.acme.httpChallenge.entryPoint=web"
       - "--certificatesresolvers.acme-http.acme.email=${EMAIL:-root@localhost}"
       - "--certificatesresolvers.acme-http.acme.storage=/letsencrypt/acme-http.json"
       - "--certificatesresolvers.acme-http.acme.caserver=${ACME_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}"
 
-      # step-ca TLS resolver
+      # acme tls resolver
       - "--certificatesresolvers.acme-tls.acme.tlschallenge=true"
       - "--certificatesresolvers.acme-tls.acme.email=${EMAIL:-root@localhost}"
       - "--certificatesresolvers.acme-tls.acme.storage=/letsencrypt/acme-tls.json"
@@ -46,14 +52,14 @@ services:
     labels:
       - "traefik.enable=true"
 
-      # Auth middleware (admin:admin by default)
+      # Auth middleware (no default password)
       - 'traefik.http.middlewares.auth.basicauth.users=admin:${ADMIN_PASSWORD:-disabled}'
 
       # Api Dashboard
       - "traefik.http.routers.traefik.rule=Host(`${HOST:-localhost}`)"
       - "traefik.http.routers.traefik.service=api@internal"
       - "traefik.http.routers.traefik.middlewares=auth"
-      - "traefik.http.routers.traefik.tls.certresolver=default"
+      - "traefik.http.routers.traefik.tls.certresolver=${TRAEFIK_CERT_RESOLVER:-default-tls}"
       - "traefik.http.routers.traefik.entrypoints=web,websecure"
 
       # middleware redirect
@@ -75,7 +81,7 @@ services:
       - "traefik.http.routers.whoami.middlewares=redirect-to-https"
       - "traefik.http.routers.whoami-tls.rule=Host(`${HOST:-localhost}`) && PathPrefix(`/whoami`)"
       - "traefik.http.routers.whoami-tls.entrypoints=websecure"
-      - "traefik.http.routers.whoami-tls.tls.certresolver=default"
+      - "traefik.http.routers.whoami-tls.tls.certresolver=${WHOAMI_CERT_RESOLVER:-default-tls}"
 
   traefik-certs:
     build: certs-extrator
