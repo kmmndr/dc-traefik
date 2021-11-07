@@ -11,3 +11,4 @@ deploy-custom: set-custom-docker-compose-file docker-compose-build docker-compos
 
 clean: environment
 	$(load_env); docker-compose down -v
+	-rm root-ca.crt
