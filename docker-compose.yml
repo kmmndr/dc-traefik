@@ -42,6 +42,9 @@ services:
       - "--certificatesresolvers.acme-tls.acme.storage=/letsencrypt/acme-tls.json"
       - "--certificatesresolvers.acme-tls.acme.caserver=${ACME_CA_SERVER:-https://acme-v02.api.letsencrypt.org/directory}"
 
+      # Increase default provider's throttle duration (and timeout for the TLS challenges)
+      - "--providers.providersThrottleDuration=100s"
+
     ports:
       - "80:80"
       - "443:443"
