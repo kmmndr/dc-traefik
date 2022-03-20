@@ -88,6 +88,7 @@ services:
 
   traefik-certs:
     build: certs-extrator
+    container_name: "traefik-certs-extractor"
     restart: always
     volumes:
       - letsencrypt:/letsencrypt
