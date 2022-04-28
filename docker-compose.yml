@@ -89,7 +89,7 @@ services:
     volumes:
       - letsencrypt:/letsencrypt
       - certs:/certs
-    command: sh -c "while true; do certs-extractor /letsencrypt/ /certs/; sleep 86400; done"
+    command: sh -c "while true; do certs-extractor /letsencrypt/ /certs/; sleep 300; done"
 
 volumes:
   letsencrypt:
