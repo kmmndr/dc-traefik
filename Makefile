@@ -2,7 +2,7 @@ default: help
 include makefiles/*.mk
 
 start: docker-compose-pull docker-compose-start ##- Start
-deploy: docker-compose-pull docker-compose-deploy ##- Deploy (start remotely)
+deploy: docker-compose-build docker-compose-pull docker-compose-deploy ##- Deploy (start remotely)
 
 set-custom-docker-compose-file:
 	$(eval compose_files=-f docker-compose.yml -f docker-compose.custom.yml)
